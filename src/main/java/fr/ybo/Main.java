@@ -13,18 +13,24 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Main {
 
     public static void main(String[] args) throws IOException, JAXBException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
+        System.err.println(sdf.format(new Date()) + ":ybo-tv-helper begin");
 
         String repertoireSortie = args[0];
 
         JAXBContext jc = JAXBContext.newInstance("fr.ybo.xmltv");
         Unmarshaller um = jc.createUnmarshaller();
 
+        System.err.println(sdf.format(new Date()) + ":getZip starting");
+
         Tv tv = (Tv) um.unmarshal(GetZip.getFile());
+        System.err.println(sdf.format(new Date()) + ":getZip finished");
 
         for (Channel channel : tv.getChannel()) {
             channel.transformId();

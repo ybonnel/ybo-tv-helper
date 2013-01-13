@@ -918,7 +918,7 @@ public class Programme implements Serializable {
     }
 
     public void transformChannelId() {
-        channel = channel.split("\\.")[0].substring(1);
+        channel = channel.split("\\.")[0];
     }
 
 }

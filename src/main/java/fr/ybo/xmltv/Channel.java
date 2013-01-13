@@ -143,7 +143,7 @@ public class Channel implements Serializable {
     }
 
     public void transformId() {
-        id = id.split("\\.")[0].substring(1);
+        id = id.split("\\.")[0];
     }
 
 }

@@ -13,7 +13,7 @@ import java.util.zip.ZipInputStream;
 public class GetZip {
 
 
-    public final static String FILE_URL = "http://kevinpato.free.fr/xmltv/download/complet.zip";
+    public final static String FILE_URL = "http://www.kazer.org/tvguide.zip?u=a5ewx4ne5whk8";
 
     public static Reader getFile() throws IOException {
 
