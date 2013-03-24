@@ -93,7 +93,7 @@ public class StarRating implements Serializable {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Icon }
+     * {@link fr.ybo.xmltv.Icon }
      * 
      * 
      */

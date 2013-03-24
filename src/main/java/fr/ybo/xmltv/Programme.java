@@ -1,6 +1,8 @@
 
 package fr.ybo.xmltv;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
@@ -43,6 +45,10 @@ import java.util.Map;
 })
 @XmlRootElement(name = "programme")
 public class Programme implements Serializable {
+    @JsonProperty("id")
+    public String getId() {
+        return getStart() + channel;
+    }
 
     @XmlAttribute(required = true)
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
@@ -67,23 +73,30 @@ public class Programme implements Serializable {
     protected String channel;
     @XmlAttribute
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
+    @JsonIgnore
     protected String clumpidx;
     @XmlElement(required = true)
+    @JsonIgnore
     protected List<Title> title;
     @XmlElement(name = "sub-title")
+    @JsonIgnore
     protected List<SubTitle> subTitle;
+    @JsonIgnore
     protected List<Desc> desc;
     protected Credits credits;
     protected String date;
+    @JsonIgnore
     protected List<Category> category;
     protected Language language;
     @XmlElement(name = "orig-language")
     protected OrigLanguage origLanguage;
     protected Length length;
+    @JsonIgnore
     protected List<Icon> icon;
     protected List<Url> url;
     protected List<Country> country;
     @XmlElement(name = "episode-num")
+    @JsonIgnore
     protected List<EpisodeNum> episodeNum;
     protected Video video;
     protected Audio audio;
@@ -95,13 +108,79 @@ public class Programme implements Serializable {
     @XmlElement(name = "new")
     protected New _new;
     protected List<Subtitles> subtitles;
+    @JsonIgnore
     protected List<Rating> rating;
     @XmlElement(name = "star-rating")
+    @JsonIgnore
     protected List<StarRating> starRating;
     protected List<Review> review;
 
 
+    @JsonProperty("title")
+    public String getOneTitle() {
+        if (getTitle().isEmpty()) {
+            return null;
+        }
+        return getTitle().get(0).getvalue();
+    }
 
+    @JsonProperty("subTitle")
+    public String getOneSubTitle() {
+        if (getSubTitle().isEmpty()) {
+            return null;
+        }
+        return getSubTitle().get(0).getvalue();
+    }
+
+    @JsonProperty("desc")
+    public String getOneDesc() {
+        if (getDesc().isEmpty()) {
+            return null;
+        }
+        return getDesc().get(0).getvalue();
+    }
+
+    @JsonProperty("categories")
+    public List<String> getCategories() {
+        List<String> categories = new ArrayList<String>(getCategory().size());
+        for (Category oneCategory : getCategory()) {
+            categories.add(oneCategory.getvalue());
+        }
+        return categories;
+    }
+
+    @JsonProperty("ratings")
+    public Map<String, String> getRatings() {
+        Map<String, String> ratings = new HashMap<String, String>(getRating().size());
+        for (Rating oneRating : getRating()) {
+            ratings.put(oneRating.getSystem(), oneRating.getValue());
+        }
+        return ratings;
+    }
+
+    @JsonProperty("episodeNum")
+    public String getOneEpisodeNum() {
+        if (getEpisodeNum().isEmpty()) {
+            return null;
+        }
+        return getEpisodeNum().get(0).getvalue();
+    }
+
+    @JsonProperty("starRating")
+    public String getOneStarRating() {
+        if (getStarRating().isEmpty()) {
+            return null;
+        }
+        return getStarRating().get(0).getValue();
+    }
+
+    @JsonProperty("icon")
+    public String getOneIcon() {
+        if (getIcon().isEmpty()) {
+            return null;
+        }
+        return getIcon().get(0).getSrc();
+    }
 
     /**
      * Gets the value of the start property.
@@ -323,9 +402,9 @@ public class Programme implements Serializable {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link fr.ybo.xmltv.Title }
-     *
-     *
+     * {@link Title }
+     * 
+     * 
      */
     public List<Title> getTitle() {
         if (title == null) {
@@ -336,25 +415,25 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the subTitle property.
-     *
+     * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the subTitle property.
-     *
+     * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getSubTitle().add(newItem);
      * </pre>
-     *
-     *
+     * 
+     * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link fr.ybo.xmltv.SubTitle }
-     *
-     *
+     * {@link SubTitle }
+     * 
+     * 
      */
     public List<SubTitle> getSubTitle() {
         if (subTitle == null) {
@@ -365,25 +444,25 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the desc property.
-     *
+     * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the desc property.
-     *
+     * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getDesc().add(newItem);
      * </pre>
-     *
-     *
+     * 
+     * 
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Desc }
-     *
-     *
+     * 
+     * 
      */
     public List<Desc> getDesc() {
         if (desc == null) {
@@ -394,11 +473,11 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the credits property.
-     *
+     * 
      * @return
      *     possible object is
-     *     {@link fr.ybo.xmltv.Credits }
-     *
+     *     {@link Credits }
+     *     
      */
     public Credits getCredits() {
         return credits;
@@ -406,11 +485,11 @@ public class Programme implements Serializable {
 
     /**
      * Sets the value of the credits property.
-     *
+     * 
      * @param value
      *     allowed object is
-     *     {@link fr.ybo.xmltv.Credits }
-     *
+     *     {@link Credits }
+     *     
      */
     public void setCredits(Credits value) {
         this.credits = value;
@@ -418,11 +497,11 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the date property.
-     *
+     * 
      * @return
      *     possible object is
      *     {@link String }
-     *
+     *     
      */
     public String getDate() {
         return date;
@@ -430,11 +509,11 @@ public class Programme implements Serializable {
 
     /**
      * Sets the value of the date property.
-     *
+     * 
      * @param value
      *     allowed object is
      *     {@link String }
-     *
+     *     
      */
     public void setDate(String value) {
         this.date = value;
@@ -442,23 +521,23 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the category property.
-     *
+     * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the category property.
-     *
+     * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getCategory().add(newItem);
      * </pre>
-     *
-     *
+     * 
+     * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Category }
+     * {@link fr.ybo.xmltv.Category }
      *
      *
      */
@@ -474,7 +553,7 @@ public class Programme implements Serializable {
      *
      * @return
      *     possible object is
-     *     {@link fr.ybo.xmltv.Language }
+     *     {@link Language }
      *
      */
     public Language getLanguage() {
@@ -486,7 +565,7 @@ public class Programme implements Serializable {
      *
      * @param value
      *     allowed object is
-     *     {@link fr.ybo.xmltv.Language }
+     *     {@link Language }
      *
      */
     public void setLanguage(Language value) {
@@ -588,7 +667,7 @@ public class Programme implements Serializable {
      *
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link fr.ybo.xmltv.Url }
+     * {@link Url }
      *
      *
      */
@@ -617,7 +696,7 @@ public class Programme implements Serializable {
      *
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link fr.ybo.xmltv.Country }
+     * {@link Country }
      *
      *
      */
@@ -646,9 +725,9 @@ public class Programme implements Serializable {
      *
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link EpisodeNum }
-     *
-     *
+     * {@link fr.ybo.xmltv.EpisodeNum }
+     * 
+     * 
      */
     public List<EpisodeNum> getEpisodeNum() {
         if (episodeNum == null) {
@@ -659,11 +738,11 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the video property.
-     *
+     * 
      * @return
      *     possible object is
-     *     {@link fr.ybo.xmltv.Video }
-     *
+     *     {@link Video }
+     *     
      */
     public Video getVideo() {
         return video;
@@ -671,11 +750,11 @@ public class Programme implements Serializable {
 
     /**
      * Sets the value of the video property.
-     *
+     * 
      * @param value
      *     allowed object is
-     *     {@link fr.ybo.xmltv.Video }
-     *
+     *     {@link Video }
+     *     
      */
     public void setVideo(Video value) {
         this.video = value;
@@ -683,11 +762,11 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the audio property.
-     *
+     * 
      * @return
      *     possible object is
-     *     {@link fr.ybo.xmltv.Audio }
-     *
+     *     {@link Audio }
+     *     
      */
     public Audio getAudio() {
         return audio;
@@ -695,11 +774,11 @@ public class Programme implements Serializable {
 
     /**
      * Sets the value of the audio property.
-     *
+     * 
      * @param value
      *     allowed object is
-     *     {@link fr.ybo.xmltv.Audio }
-     *
+     *     {@link Audio }
+     *     
      */
     public void setAudio(Audio value) {
         this.audio = value;
@@ -707,11 +786,11 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the previouslyShown property.
-     *
+     * 
      * @return
      *     possible object is
-     *     {@link fr.ybo.xmltv.PreviouslyShown }
-     *
+     *     {@link PreviouslyShown }
+     *     
      */
     public PreviouslyShown getPreviouslyShown() {
         return previouslyShown;
@@ -719,11 +798,11 @@ public class Programme implements Serializable {
 
     /**
      * Sets the value of the previouslyShown property.
-     *
+     * 
      * @param value
      *     allowed object is
-     *     {@link fr.ybo.xmltv.PreviouslyShown }
-     *
+     *     {@link PreviouslyShown }
+     *     
      */
     public void setPreviouslyShown(PreviouslyShown value) {
         this.previouslyShown = value;
@@ -731,11 +810,11 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the premiere property.
-     *
+     * 
      * @return
      *     possible object is
-     *     {@link fr.ybo.xmltv.Premiere }
-     *
+     *     {@link Premiere }
+     *     
      */
     public Premiere getPremiere() {
         return premiere;
@@ -743,11 +822,11 @@ public class Programme implements Serializable {
 
     /**
      * Sets the value of the premiere property.
-     *
+     * 
      * @param value
      *     allowed object is
-     *     {@link fr.ybo.xmltv.Premiere }
-     *
+     *     {@link Premiere }
+     *     
      */
     public void setPremiere(Premiere value) {
         this.premiere = value;
@@ -755,11 +834,11 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the lastChance property.
-     *
+     * 
      * @return
      *     possible object is
-     *     {@link fr.ybo.xmltv.LastChance }
-     *
+     *     {@link LastChance }
+     *     
      */
     public LastChance getLastChance() {
         return lastChance;
@@ -767,11 +846,11 @@ public class Programme implements Serializable {
 
     /**
      * Sets the value of the lastChance property.
-     *
+     * 
      * @param value
      *     allowed object is
-     *     {@link fr.ybo.xmltv.LastChance }
-     *
+     *     {@link LastChance }
+     *     
      */
     public void setLastChance(LastChance value) {
         this.lastChance = value;
@@ -779,11 +858,11 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the new property.
-     *
+     * 
      * @return
      *     possible object is
-     *     {@link fr.ybo.xmltv.New }
-     *
+     *     {@link New }
+     *     
      */
     public New getNew() {
         return _new;
@@ -791,11 +870,11 @@ public class Programme implements Serializable {
 
     /**
      * Sets the value of the new property.
-     *
+     * 
      * @param value
      *     allowed object is
-     *     {@link fr.ybo.xmltv.New }
-     *
+     *     {@link New }
+     *     
      */
     public void setNew(New value) {
         this._new = value;
@@ -803,25 +882,25 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the subtitles property.
-     *
+     * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the subtitles property.
-     *
+     * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getSubtitles().add(newItem);
      * </pre>
-     *
-     *
+     * 
+     * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link fr.ybo.xmltv.Subtitles }
-     *
-     *
+     * {@link Subtitles }
+     * 
+     * 
      */
     public List<Subtitles> getSubtitles() {
         if (subtitles == null) {
@@ -832,25 +911,25 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the rating property.
-     *
+     * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the rating property.
-     *
+     * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRating().add(newItem);
      * </pre>
-     *
-     *
+     * 
+     * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link fr.ybo.xmltv.Rating }
-     *
-     *
+     * {@link Rating }
+     * 
+     * 
      */
     public List<Rating> getRating() {
         if (rating == null) {
@@ -861,25 +940,25 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the starRating property.
-     *
+     * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the starRating property.
-     *
+     * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getStarRating().add(newItem);
      * </pre>
-     *
-     *
+     * 
+     * 
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link StarRating }
-     *
-     *
+     * 
+     * 
      */
     public List<StarRating> getStarRating() {
         if (starRating == null) {
@@ -890,23 +969,23 @@ public class Programme implements Serializable {
 
     /**
      * Gets the value of the review property.
-     *
+     * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the review property.
-     *
+     * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getReview().add(newItem);
      * </pre>
-     *
-     *
+     * 
+     * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link fr.ybo.xmltv.Review }
+     * {@link Review }
      * 
      * 
      */
@@ -915,10 +994,6 @@ public class Programme implements Serializable {
             review = new ArrayList<Review>();
         }
         return this.review;
-    }
-
-    public void transformChannelId() {
-        channel = channel.split("\\.")[0];
     }
 
 }

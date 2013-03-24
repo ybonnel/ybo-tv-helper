@@ -51,8 +51,8 @@ public class Subtitles implements Serializable {
      * 
      * @return
      *     possible object is
-     *     {@link Language }
-     *     
+     *     {@link fr.ybo.xmltv.Language }
+     *
      */
     public Language getLanguage() {
         return language;
@@ -60,10 +60,10 @@ public class Subtitles implements Serializable {
 
     /**
      * Sets the value of the language property.
-     * 
+     *
      * @param value
      *     allowed object is
-     *     {@link Language }
+     *     {@link fr.ybo.xmltv.Language }
      *     
      */
     public void setLanguage(Language value) {

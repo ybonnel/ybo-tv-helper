@@ -30,23 +30,23 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link fr.ybo.xmltv.Presenter }
-     *
+     * Create an instance of {@link Presenter }
+     * 
      */
     public Presenter createPresenter() {
         return new Presenter();
     }
 
     /**
-     * Create an instance of {@link fr.ybo.xmltv.Editor }
-     *
+     * Create an instance of {@link Editor }
+     * 
      */
     public Editor createEditor() {
         return new Editor();
     }
 
     /**
-     * Create an instance of {@link Title }
+     * Create an instance of {@link fr.ybo.xmltv.Title }
      *
      */
     public Title createTitle() {
@@ -54,7 +54,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link LastChance }
+     * Create an instance of {@link fr.ybo.xmltv.LastChance }
      *
      */
     public LastChance createLastChance() {
@@ -62,7 +62,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Writer }
+     * Create an instance of {@link fr.ybo.xmltv.Writer }
      *
      */
     public Writer createWriter() {
@@ -70,7 +70,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Length }
+     * Create an instance of {@link fr.ybo.xmltv.Length }
      *
      */
     public Length createLength() {
@@ -86,7 +86,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link SubTitle }
+     * Create an instance of {@link fr.ybo.xmltv.SubTitle }
      *
      */
     public SubTitle createSubTitle() {
@@ -94,7 +94,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Language }
+     * Create an instance of {@link fr.ybo.xmltv.Language }
      *
      */
     public Language createLanguage() {
@@ -102,7 +102,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Credits }
+     * Create an instance of {@link fr.ybo.xmltv.Credits }
      *
      */
     public Credits createCredits() {
@@ -110,7 +110,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Category }
+     * Create an instance of {@link fr.ybo.xmltv.Category }
      *
      */
     public Category createCategory() {
@@ -158,7 +158,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Url }
+     * Create an instance of {@link fr.ybo.xmltv.Url }
      *
      */
     public Url createUrl() {
@@ -182,7 +182,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Programme }
+     * Create an instance of {@link fr.ybo.xmltv.Programme }
      *
      */
     public Programme createProgramme() {
@@ -206,7 +206,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Desc }
+     * Create an instance of {@link fr.ybo.xmltv.Desc }
      *
      */
     public Desc createDesc() {
@@ -214,7 +214,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Guest }
+     * Create an instance of {@link fr.ybo.xmltv.Guest }
      *
      */
     public Guest createGuest() {
@@ -238,7 +238,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link fr.ybo.xmltv.Commentator }
+     * Create an instance of {@link Commentator }
      *
      */
     public Commentator createCommentator() {
@@ -262,7 +262,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link EpisodeNum }
+     * Create an instance of {@link fr.ybo.xmltv.EpisodeNum }
      *
      */
     public EpisodeNum createEpisodeNum() {
@@ -294,23 +294,23 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link fr.ybo.xmltv.Video }
-     * 
+     * Create an instance of {@link Video }
+     *
      */
     public Video createVideo() {
         return new Video();
     }
 
     /**
-     * Create an instance of {@link Icon }
-     * 
+     * Create an instance of {@link fr.ybo.xmltv.Icon }
+     *
      */
     public Icon createIcon() {
         return new Icon();
     }
 
     /**
-     * Create an instance of {@link Director }
+     * Create an instance of {@link fr.ybo.xmltv.Director }
      * 
      */
     public Director createDirector() {
