@@ -221,9 +221,7 @@ public class Main {
 
 
         for (Channel channel : tvFromKaezer.getChannel()) {
-            System.out.println(channel.getId());
             if (idsFromKaezer.contains(channel.getId())) {
-                System.out.println("Added");
                 tv.getChannel().add(channel);
             }
         }
