@@ -33,6 +33,12 @@ public class Main {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
+    private final static Set<String> idsFromKaezer = new HashSet<String>() {{
+        add("BEI1.kazer.org");
+        add("BEI2.kazer.org");
+        add("NOL1.kazer.org");
+    }};
+
     private final static Map<String, String> mapIds = new HashMap<String, String>() {{
         put("C20", "13R1");
         put("C4133", "6TER");
@@ -43,8 +49,8 @@ public class Main {
         put("C26", "ACT1");
         put("C29", "ANI1");
         put("C7", "ART1");
-        //put("BEI1", "beinsport1");
-        //put("BEI2", "beinsport2");
+        put("BEI1", "BEI1");
+        put("BEI2", "BEI2");
         put("C15", "BFM1");
         put("C38", "BOO1");
         put("C56", "CIN20");
@@ -98,7 +104,7 @@ public class Main {
         put("C150", "MTV1");
         put("C168", "NAT1");
         put("C171", "NIC1");
-        //put("NOL1", "nolife");
+        put("NOL1", "NOL1");
         put("C12", "NRJ1");
         put("C11", "NT11");
         put("C4134", "NU23");
@@ -199,7 +205,7 @@ public class Main {
 
     }
 
-    private static Tv getTvFromXml(String xmlFile) throws JAXBException {
+    private static Tv getTvFromXml(String xmlFile) throws JAXBException, IOException {
         JAXBContext jc = JAXBContext.newInstance("fr.ybo.xmltv");
         Unmarshaller um = jc.createUnmarshaller();
 
@@ -207,6 +213,28 @@ public class Main {
 
         Tv tv = (Tv) um.unmarshal(new File(xmlFile));
         logger.info("End getZip");
+
+        logger.info("Begin get from kaezer");
+
+        Tv tvFromKaezer = (Tv) um.unmarshal(GetZip.getFile());
+
+
+
+        for (Channel channel : tvFromKaezer.getChannel()) {
+            System.out.println(channel.getId());
+            if (idsFromKaezer.contains(channel.getId())) {
+                System.out.println("Added");
+                tv.getChannel().add(channel);
+            }
+        }
+
+        for (Programme programme : tvFromKaezer.getProgramme()) {
+            if (idsFromKaezer.contains(programme.getChannel())) {
+                tv.getProgramme().add(programme);
+            }
+        }
+
+        logger.info("End get from kaezer");
 
         return tv;
     }
