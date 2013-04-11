@@ -12,6 +12,7 @@ import fr.ybo.xmltv.Channel;
 import fr.ybo.xmltv.Programme;
 import fr.ybo.xmltv.Tv;
 import net.spy.memcached.PersistTo;
+import net.spy.memcached.internal.CheckedOperationTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,17 +193,29 @@ public class Main {
 
         CouchbaseClient client = new CouchbaseClient(newArrayList(new URI("http://127.0.0.1:8091/pools")), "default", "");
 
-        // Insertion des chaines
-        logger.info("Insert channels");
-        client.set("channels", (int) TimeUnit.DAYS.toSeconds(3), mapper.writeValueAsString(tv.getChannel()), PersistTo.ZERO).get();
+        try {
 
-        logger.info("Insert programs");
-        for (ProgrammeForCouchBase programme : tv.getProgramme()) {
-            client.set("prg_" + programme.getId(), (int) TimeUnit.DAYS.toSeconds(3), mapper.writeValueAsString(programme), PersistTo.ZERO).get();
+
+            // Insertion des chaines
+            logger.info("Insert channels");
+            client.set("channels", (int) TimeUnit.DAYS.toSeconds(3), mapper.writeValueAsString(tv.getChannel()), PersistTo.ZERO).get();
+
+            logger.info("Insert programs");
+            for (ProgrammeForCouchBase programme : tv.getProgramme()) {
+                int retry = 0;
+                while (retry < 5) {
+                    try {
+                        client.set("prg_" + programme.getId(), (int) TimeUnit.DAYS.toSeconds(3), mapper.writeValueAsString(programme), PersistTo.ZERO).get();
+                        retry = Integer.MAX_VALUE;
+                    } catch (Exception exception) {
+                        retry++;
+                        logger.warn("Exception détectée, essai({}) : {}", retry, exception.getMessage());
+                    }
+                }
+            }
+        } finally {
+            client.shutdown(30, TimeUnit.SECONDS);
         }
-
-        client.shutdown(30, TimeUnit.SECONDS);
-
     }
 
     private static Tv getTvFromXml(String xmlFile) throws JAXBException, IOException {
