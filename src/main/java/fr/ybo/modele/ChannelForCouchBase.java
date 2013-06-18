@@ -129,6 +129,12 @@ public class ChannelForCouchBase implements Serializable, Comparable<ChannelForC
         put("USH1", "ushuaiatv");
         put("VIV1", "vivolta");
         put("W91", "w9");
+        put("EUR4", "eurosport2"); // Eurosport 2
+        put("HIS1", "histoire"); // histoire
+        put("IDF1", "idf1"); // IDF1
+        put("SCL1", "serieclub"); // Série club
+        put("MCM2", "mcmpop"); // MCM Pop
+        put("MCM3", "mcmtop"); // MCM Top
     }};
 
     public String getId() {

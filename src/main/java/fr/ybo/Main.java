@@ -136,6 +136,12 @@ public class Main {
         put("C247", "VIV1");
         put("C299", "TOU1");
         put("C9", "W91");
+        put("C90", "EUR4"); // Eurosport 2
+        put("C122", "HIS1"); // histoire
+        put("C294", "IDF1"); // IDF1
+        put("C203", "SCL1"); // Série club
+        put("C146", "MCM2"); // MCM Pop
+        put("C147", "MCM3"); // MCM Top
     }};
 
     public static void main(String[] args) throws IOException, JAXBException, InterruptedException, ExecutionException, URISyntaxException {
