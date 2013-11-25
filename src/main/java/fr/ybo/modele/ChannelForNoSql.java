@@ -2,7 +2,10 @@ package fr.ybo.modele;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.primitives.Ints;
+import com.sun.org.apache.bcel.internal.generic.RETURN;
 import fr.ybo.xmltv.Channel;
+import org.jongo.marshall.jackson.oid.Id;
+import org.jongo.marshall.jackson.oid.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,28 +13,77 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ChannelForCouchBase implements Serializable, Comparable<ChannelForCouchBase> {
+public class ChannelForNoSql implements Serializable, Comparable<ChannelForNoSql> {
 
+    private static final Logger logger = LoggerFactory.getLogger(ChannelForNoSql.class);
+
+    @Id
+    @ObjectId
+    private String key;
     private String id;
     private String displayName;
+    private String icon;
+    private Integer numero;
 
+    public String getKey() {
+        return key;
+    }
 
-    private static final Logger logger = LoggerFactory.getLogger(ChannelForCouchBase.class);
+    public String getId() {
+        return id;
+    }
 
-    @JsonProperty("icon")
-    public String getOneIcon() {
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public Integer getNumero() {
+        return numero;
+    }
+
+    @Override
+    public int compareTo(ChannelForNoSql o) {
+        int result = Ints.compare(getNumero(id), getNumero(o.id));
+        if (result == 0) {
+            result = id.compareTo(o.id);
+        }
+        return result;
+    }
+
+    public ChannelForNoSql() {
+    }
+
+    public ChannelForNoSql(String id, String displayName) {
+        this.id = id;
+        this.displayName = displayName;
         if (!mapChaineLogo.containsKey(id)) {
             logger.warn("La chaine {} n'a pas de logo", id);
         }
-        return mapChaineLogo.get(id) + ".png";
+        icon = mapChaineLogo.get(id) + ".png";
+        numero = getNumero(id);
     }
 
-    @JsonProperty("numero")
-    public int getNumero() {
-        return getNumero(id);
+    public static ChannelForNoSql fromChannel(Channel channel) {
+        return new ChannelForNoSql(channel.getId(), channel.getOneDisplayName());
     }
 
-    private final static Map<String, String> mapChaineLogo = new HashMap<String, String>() {{
+
+
+    private static int getNumero(String idChaine) {
+        if (mapChaineNumero.containsKey(idChaine)) {
+            return mapChaineNumero.get(idChaine);
+        } else {
+            return 999;
+        }
+    }
+
+
+
+    private static final Map<String, String> mapChaineLogo = new HashMap<String, String>() {{
         put("13R1", "13erue");
         put("6TER", "6ter");
         put("MOT1", "abmoteurs");
@@ -136,42 +188,7 @@ public class ChannelForCouchBase implements Serializable, Comparable<ChannelForC
         put("MCM2", "mcmpop"); // MCM Pop
         put("MCM3", "mcmtop"); // MCM Top
     }};
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public static ChannelForCouchBase fromChannel(Channel channel) {
-        ChannelForCouchBase channelForMemCache = new ChannelForCouchBase();
-        channelForMemCache.setDisplayName(channel.getOneDisplayName());
-        channelForMemCache.setId(channel.getId());
-        return channelForMemCache;
-    }
-
-    private transient ProgrammeForCouchBase currentProgramme;
-
-    public ProgrammeForCouchBase getCurrentProgramme() {
-        return currentProgramme;
-    }
-
-    public void setCurrentProgramme(ProgrammeForCouchBase currentProgramme) {
-        this.currentProgramme = currentProgramme;
-    }
-
-
-    private final static Map<String, Integer> mapChaineNumero = new HashMap<String, Integer>() {{
+    private static final Map<String, Integer> mapChaineNumero = new HashMap<String, Integer>() {{
         put("TF11", 1);
         put("FRA2", 2);
         put("FRA3", 3);
@@ -202,20 +219,7 @@ public class ChannelForCouchBase implements Serializable, Comparable<ChannelForC
         put("RTL2", 52);
     }};
 
-    private static int getNumero(String idChaine) {
-        if (mapChaineNumero.containsKey(idChaine)) {
-            return mapChaineNumero.get(idChaine);
-        } else {
-            return 999;
-        }
-    }
-
-    @Override
-    public int compareTo(ChannelForCouchBase o) {
-        int result = Ints.compare(getNumero(id), getNumero(o.id));
-        if (result == 0) {
-            result = id.compareTo(o.id);
-        }
-        return result;
+    public void setKey(String key) {
+        this.key = key;
     }
 }

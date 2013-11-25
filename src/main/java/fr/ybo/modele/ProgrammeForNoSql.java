@@ -2,6 +2,8 @@ package fr.ybo.modele;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.ybo.xmltv.Programme;
+import org.jongo.marshall.jackson.oid.Id;
+import org.jongo.marshall.jackson.oid.ObjectId;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,8 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ProgrammeForCouchBase implements Serializable {
+public class ProgrammeForNoSql implements Serializable {
 
+    @Id
+    @ObjectId
+    private String id;
     private String start;
     private String stop;
     private String channel;
@@ -28,9 +33,12 @@ public class ProgrammeForCouchBase implements Serializable {
     private List<String> writers;
     private List<String> presenters;
 
-    @JsonProperty("id")
     public String getId() {
-        return start + channel;
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getStart() {
@@ -157,8 +165,8 @@ public class ProgrammeForCouchBase implements Serializable {
         return presenters;
     }
 
-    public static ProgrammeForCouchBase fromProgramme(Programme programme) {
-        ProgrammeForCouchBase programmeForMemCache = new ProgrammeForCouchBase();
+    public static ProgrammeForNoSql fromProgramme(Programme programme) {
+        ProgrammeForNoSql programmeForMemCache = new ProgrammeForNoSql();
         programmeForMemCache.setCategories(new ArrayList<String>(programme.getCategories()));
         programmeForMemCache.setChannel(programme.getChannel());
         programmeForMemCache.setDate(programme.getDate());

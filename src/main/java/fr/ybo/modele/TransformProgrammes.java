@@ -5,9 +5,9 @@ import fr.ybo.xmltv.Programme;
 
 import java.io.Serializable;
 
-public class TransformProgrammes implements Function<Programme, ProgrammeForCouchBase>, Serializable {
+public class TransformProgrammes implements Function<Programme, ProgrammeForNoSql>, Serializable {
     @Override
-    public ProgrammeForCouchBase apply(Programme programme) {
-        return ProgrammeForCouchBase.fromProgramme(programme);
+    public ProgrammeForNoSql apply(Programme programme) {
+        return ProgrammeForNoSql.fromProgramme(programme);
     }
 }

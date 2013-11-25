@@ -1,18 +1,20 @@
 package fr.ybo;
 
 
-import com.couchbase.client.CouchbaseClient;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
-import fr.ybo.modele.ChannelForCouchBase;
-import fr.ybo.modele.ProgrammeForCouchBase;
-import fr.ybo.modele.TvForCouchBase;
+import com.mongodb.DB;
+import com.mongodb.MongoClient;
+import fr.ybo.modele.ChannelForNoSql;
+import fr.ybo.modele.ProgrammeForNoSql;
+import fr.ybo.modele.TvForNoSql;
 import fr.ybo.xmltv.Channel;
 import fr.ybo.xmltv.Programme;
 import fr.ybo.xmltv.Tv;
-import net.spy.memcached.PersistTo;
-import net.spy.memcached.internal.CheckedOperationTimeoutException;
+import org.bson.types.ObjectId;
+import org.jongo.Jongo;
+import org.jongo.MongoCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,14 +23,13 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 public class Main {
 
@@ -185,42 +186,61 @@ public class Main {
 
         logger.info("begin transform tv");
 
-        TvForCouchBase tvForCouchBase = TvForCouchBase.fromTv(tv);
+        TvForNoSql tvForNoSql = TvForNoSql.fromTv(tv);
 
         logger.info("end transform tv");
 
-        insertIntoChouchbase(tvForCouchBase);
+        insertIntoDatabase(tvForNoSql);
     }
 
-    private static void insertIntoChouchbase(TvForCouchBase tv) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+    private static void insertIntoDatabase(TvForNoSql tv) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
-        CouchbaseClient client = new CouchbaseClient(newArrayList(new URI("http://127.0.0.1:8091/pools")), "default", "");
+        DB db = new MongoClient().getDB("ybotv");
+        Jongo jongo = new Jongo(db);
 
         try {
+
+            logger.info("Create jeton");
 
 
             // Insertion des chaines
             logger.info("Insert channels");
-            client.set("channels", (int) TimeUnit.DAYS.toSeconds(3), mapper.writeValueAsString(tv.getChannel()), PersistTo.ZERO).get();
+            MongoCollection collectionChannels = jongo.getCollection("channels");
+            Set<String> channelIds = new HashSet<String>();
+            for (ChannelForNoSql channel : tv.getChannel()) {
+                ChannelForNoSql channelInDb = collectionChannels.findOne("{id : '" + channel.getId() +"'}").as(ChannelForNoSql.class);
+                if (channelInDb == null) {
+                    collectionChannels.save(channel);
+                } else {
+                    channel.setKey(channelInDb.getKey());
+                    collectionChannels.update(new ObjectId(channelInDb.getKey())).merge(channel);
+                }
+                channelIds.add(channel.getId());
+            }
 
-            logger.info("Insert programs");
-            for (ProgrammeForCouchBase programme : tv.getProgramme()) {
-                int retry = 0;
-                while (retry < 5) {
-                    try {
-                        client.set("prg_" + programme.getId(), (int) TimeUnit.DAYS.toSeconds(3), mapper.writeValueAsString(programme), PersistTo.ZERO).get();
-                        retry = Integer.MAX_VALUE;
-                    } catch (Exception exception) {
-                        retry++;
-                        logger.warn("Exception détectée, essai({}) : {}", retry, exception.getMessage());
-                    }
+            for (ChannelForNoSql channelInDb : collectionChannels.find().as(ChannelForNoSql.class)) {
+                if (!channelIds.contains(channelInDb.getId())) {
+                    collectionChannels.remove(new ObjectId(channelInDb.getKey()));
                 }
             }
+
+            db.getCollection("new_programmes").drop();
+
+            MongoCollection collectionProgrammes = jongo.getCollection("new_programmes");
+            collectionProgrammes.ensureIndex("{channel:1}");
+
+            logger.info("Insert programs");
+            for (ProgrammeForNoSql programme : tv.getProgramme()) {
+                collectionProgrammes.insert(programme);
+            }
+
+            db.getCollection("new_programmes").rename("programmes", true);
+
         } finally {
-            client.shutdown(30, TimeUnit.SECONDS);
+            db.getMongo().close();
         }
     }
 

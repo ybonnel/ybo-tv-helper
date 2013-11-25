@@ -5,10 +5,10 @@ import fr.ybo.xmltv.Channel;
 
 import java.io.Serializable;
 
-public class TransformChannels implements Function<Channel, ChannelForCouchBase>, Serializable {
+public class TransformChannels implements Function<Channel, ChannelForNoSql>, Serializable {
 
     @Override
-    public ChannelForCouchBase apply(Channel channel) {
-        return ChannelForCouchBase.fromChannel(channel);
+    public ChannelForNoSql apply(Channel channel) {
+        return ChannelForNoSql.fromChannel(channel);
     }
 }
