@@ -1,17 +1,119 @@
 package fr.ybo.modele;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import fr.ybo.xmltv.Programme;
+import net.sf.json.JSONObject;
 import org.jongo.marshall.jackson.oid.Id;
 import org.jongo.marshall.jackson.oid.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class ProgrammeForNoSql implements Serializable {
+    private static final Logger logger = LoggerFactory.getLogger(ProgrammeForNoSql.class);
+
+    public ProgrammeForNoSql() {
+    }
+
+    public ProgrammeForNoSql(JSONObject json, Map<Integer, String> genres) {
+        start = json.getJSONObject("horaire").getString("debut")
+                .replace("-", "")
+                .replace(":", "")
+                .replace(" ", "");
+        stop = json.getJSONObject("horaire").getString("fin")
+                .replace("-", "")
+                .replace(":", "")
+                .replace(" ", "");
+        channel = Integer.toString(json.getInt("id_chaine"));
+
+        if (json.get("annee_realisation") != null) {
+            date = json.getString("annee_realisation");
+        }
+
+
+        icon = Optional.ofNullable(json.optJSONObject("vignettes"))
+                .map(vignettes -> vignettes.getString("petite"))
+                .orElse(null);
+
+        title = json.getString("titre");
+        subTitle = json.getString("soustitre");
+        desc = json.getString("resume");
+
+        ratings = new HashMap<>();
+        ratings.put("CSA", "-" + json.getString("csa"));
+
+        episodeNum = Optional.ofNullable(json.optJSONObject("serie"))
+                .map(serie -> serie.getString("saison") + "-" + serie.getString("numero_episode")).orElse(null);
+
+
+        if (json.has("intervenants")) {
+
+            Stream<Object> stream = json.getJSONArray("intervenants").stream();
+
+            stream.map(JSONObject::fromObject)
+                    .forEach(intervenant -> {
+                        switch (intervenant.getString("libelle")) {
+                            case "Interprète":
+                            case "Acteur":
+                            case "Guest star":
+                            case "Invité":
+                            case "Autre Invité":
+                            case "Chef d'orchestre":
+                            case "Soliste":
+                            case "Voix Off VO":
+                            case "Voix Off VF":
+                            case "Invité vedette":
+                            case "Compagnie":
+                            case "Danseur":
+                                getActors().add(intervenant.getString("prenom") + " " + intervenant.getString("nom"));
+                                break;
+                            case "Décors":
+                            case "Image":
+                            case "Musique":
+                            case "":
+                                break;
+                            case "Présentateur":
+                            case "Présentateur vedette":
+                            case "Autre présentateur":
+                                getPresenters().add(intervenant.getString("prenom") + " " + intervenant.getString("nom"));
+                                break;
+                            case "Réalisateur":
+                            case "Réalisateur/Metteur en Scène":
+                            case "Metteur en scène":
+                            case "Chorégraphe":
+                                getDirectors().add(intervenant.getString("prenom") + " " + intervenant.getString("nom"));
+                                break;
+                            case "Auteur" :
+                            case "Scénario":
+                            case "Scénariste":
+                            case "Créateur":
+                            case "Dialogue":
+                            case "Origine Scénario":
+                            case "Scénario original":
+                            case "Compositeur":
+                                getWriters().add(intervenant.getString("prenom") + " " + intervenant.getString("nom"));
+                                break;
+                            default:
+                                logger.warn("Type d'intervenant inconnu : {}", intervenant.toString());
+                        }
+                    });
+
+        }
+        this.critique = json.getString("critique");
+        this.categories = new ArrayList<>();
+
+
+        String genre = genres.get(json.optInt("id_genre"));
+        if (genre != null) {
+            this.categories.add(genre);
+        }
+        String genreSpecifique = json.optString("genre_specifique", "");
+        if (genreSpecifique != null && genreSpecifique.length() > 0) {
+            this.categories.add(genreSpecifique);
+        }
+
+    }
 
     @Id
     @ObjectId
@@ -32,6 +134,7 @@ public class ProgrammeForNoSql implements Serializable {
     private List<String> actors;
     private List<String> writers;
     private List<String> presenters;
+    private String critique;
 
     public String getId() {
         return id;
@@ -163,28 +266,5 @@ public class ProgrammeForNoSql implements Serializable {
             presenters = new ArrayList<String>();
         }
         return presenters;
-    }
-
-    public static ProgrammeForNoSql fromProgramme(Programme programme) {
-        ProgrammeForNoSql programmeForMemCache = new ProgrammeForNoSql();
-        programmeForMemCache.setCategories(new ArrayList<String>(programme.getCategories()));
-        programmeForMemCache.setChannel(programme.getChannel());
-        programmeForMemCache.setDate(programme.getDate());
-        programmeForMemCache.setDesc(programme.getOneDesc());
-        programmeForMemCache.setEpisodeNum(programme.getOneEpisodeNum());
-        programmeForMemCache.setIcon(programme.getOneIcon());
-        programmeForMemCache.setRatings(new HashMap<String, String>(programme.getRatings()));
-        programmeForMemCache.setStarRating(programme.getOneStarRating());
-        programmeForMemCache.setStart(programme.getStart());
-        programmeForMemCache.setStop(programme.getStop());
-        programmeForMemCache.setSubTitle(programme.getOneSubTitle());
-        programmeForMemCache.setTitle(programme.getOneTitle());
-        if (programme.getCredits() != null) {
-            programmeForMemCache.getDirectors().addAll(programme.getCredits().getDirectors());
-            programmeForMemCache.getActors().addAll(programme.getCredits().getActors());
-            programmeForMemCache.getWriters().addAll(programme.getCredits().getWriters());
-            programmeForMemCache.getPresenters().addAll(programme.getCredits().getPresenters());
-        }
-        return programmeForMemCache;
     }
 }
