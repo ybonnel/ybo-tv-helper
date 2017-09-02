@@ -57,31 +57,31 @@ public class ChannelForNoSql implements Serializable {
         this.displayName = json.getString("nom");
         this.icon = "_" + this.id + ".png";
 
-        try {
-
-            if (!new File(logoDir, icon).exists()) {
-                File tmpFile = new File("/tmp", icon);
-                try (AsyncHttpClient client = new DefaultAsyncHttpClient();
-                     FileOutputStream out = new FileOutputStream(tmpFile)) {
-                    byte[] image = client.prepareGet(json.getString("logo"))
-                            .execute().get().getResponseBodyAsBytes();
-                    out.write(image);
-                }
-                logger.info("Execute : convert " + tmpFile.getAbsolutePath() + " -resize 132x132 -crop 132x99+0+16 +repage " + new File(logoDir, icon).getAbsolutePath());
-                Process process = Runtime.getRuntime().exec("convert " + tmpFile.getAbsolutePath() + " -resize 132x132 -crop 132x99+0+16 +repage " + new File(logoDir, icon).getAbsolutePath());
-                int result = process.waitFor();
-                if (result != 0) {
-                    logger.warn("Code retour : {} (channel : {})", result, displayName);
-                }
-                try (BufferedReader sout = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                     BufferedReader serr = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-                    sout.lines().forEach(logger::info);
-                    serr.lines().forEach(logger::warn);
-                }
-            }
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
+//        try {
+//
+//            if (!new File(logoDir, icon).exists()) {
+//                File tmpFile = new File("/tmp", icon);
+//                try (AsyncHttpClient client = new DefaultAsyncHttpClient();
+//                     FileOutputStream out = new FileOutputStream(tmpFile)) {
+//                    byte[] image = client.prepareGet(json.getString("logo"))
+//                            .execute().get().getResponseBodyAsBytes();
+//                    out.write(image);
+//                }
+//                logger.info("Execute : convert " + tmpFile.getAbsolutePath() + " -resize 132x132 -crop 132x99+0+16 +repage " + new File(logoDir, icon).getAbsolutePath());
+//                Process process = Runtime.getRuntime().exec("convert " + tmpFile.getAbsolutePath() + " -resize 132x132 -crop 132x99+0+16 +repage " + new File(logoDir, icon).getAbsolutePath());
+//                int result = process.waitFor();
+//                if (result != 0) {
+//                    logger.warn("Code retour : {} (channel : {})", result, displayName);
+//                }
+//                try (BufferedReader sout = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//                     BufferedReader serr = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+//                    sout.lines().forEach(logger::info);
+//                    serr.lines().forEach(logger::warn);
+//                }
+//            }
+//        } catch (Exception exception) {
+//            throw new RuntimeException(exception);
+//        }
 
         numero = numeros.getOrDefault(id, 999);
     }
