@@ -27,7 +27,7 @@ public class ProgrammeForNoSql implements Serializable {
                 .replace(" ", "");
         channel = Integer.toString(json.getInt("id_chaine"));
 
-        if (json.get("annee_realisation") != null) {
+        if (json.get("annee_realisation") != null && !json.getString("annee_realisation").equals("null")) {
             date = json.getString("annee_realisation");
         }
 
@@ -38,7 +38,7 @@ public class ProgrammeForNoSql implements Serializable {
 
         title = json.getString("titre");
         subTitle = json.getString("soustitre");
-        desc = json.getString("resume");
+        desc = json.getString("resume").equals("null") ? null : json.getString("resume");
 
         ratings = new HashMap<>();
         ratings.put("CSA", "-" + json.getString("csa"));
