@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -26,7 +29,7 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
 
-    public static void main(String[] args) throws IOException, JAXBException, InterruptedException, ExecutionException, URISyntaxException {
+    public static void main(String[] args) throws IOException, JAXBException, InterruptedException, ExecutionException, URISyntaxException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
 
 
         logger.info("ybo-tv-helper begin");

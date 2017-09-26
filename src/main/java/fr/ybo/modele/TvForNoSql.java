@@ -7,9 +7,13 @@ import org.asynchttpclient.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.Serializable;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -252,18 +256,46 @@ public class TvForNoSql implements Serializable {
                     channel -> numero.getAndIncrement()
             ));
 
+    private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
+
+    private static String toHexString(byte[] bytes) {
+        Formatter formatter = new Formatter();
+
+        for (byte b : bytes) {
+            formatter.format("%02x", b);
+        }
+
+        return formatter.toString();
+    }
+
+    public static String calculateRFC2104HMAC(String data, String key)
+            throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
+        SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(), HMAC_SHA1_ALGORITHM);
+        Mac mac = Mac.getInstance(HMAC_SHA1_ALGORITHM);
+        mac.init(signingKey);
+        return toHexString(mac.doFinal(data.getBytes()));
+    }
+
+
+    public static String signature(String params) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return calculateRFC2104HMAC(params, "Eufea9cuweuHeif");
+    }
+
 
     @SuppressWarnings("unchecked")
-    public static TvForNoSql fetchFromTelerama() throws IOException, ExecutionException, InterruptedException {
+    public static TvForNoSql fetchFromTelerama() throws IOException, ExecutionException, InterruptedException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
 
         try (AsyncHttpClient client = new DefaultAsyncHttpClient()) {
 
             Response response = client.prepareGet("https://api.telerama.fr/v1/application/initialisation")
+                    .addQueryParam("appareil", "android_tablette")
+                    .addQueryParam("api_cle", "apitel-5304b49c90511")
+                    .addQueryParam("api_signature", signature("/v1/application/initialisationappareilandroid_tablette"))
                     .addHeader("accept-encoding", "gzip")
                     .execute().get();
 
             if (response.getStatusCode() != 200) {
-                throw new RuntimeException("Unable to get initialisation data");
+                throw new RuntimeException("Unable to get initialisation data, status=" + response.getStatusCode() + ", response=" + response.getResponseBody());
             }
 
             JSONObject jsonResponse = JSONObject.fromObject(response.getResponseBody()).getJSONObject("donnees");
@@ -312,7 +344,7 @@ public class TvForNoSql implements Serializable {
         }
     }
 
-    public static List<ProgrammeForNoSql> getProgrammeForChannel(AsyncHttpClient client, ChannelForNoSql channel, Map<Integer, String> genres) {
+    public static List<ProgrammeForNoSql> getProgrammeForChannel(AsyncHttpClient client, ChannelForNoSql channel, Map<Integer, String> genres)  {
         List<ProgrammeForNoSql> result = new ArrayList<>();
 
         try {
@@ -323,7 +355,12 @@ public class TvForNoSql implements Serializable {
 
                 String url = "http://api.telerama.fr/v1/programmes/telechargement?dates=" + date.toString() + "&id_chaines=" + channel.getId() + "&nb_par_page=300&page=1";
 
-                Response response = client.prepareGet(url)
+                Response response = client
+                        .prepareGet(url)
+                        .addQueryParam("appareil", "android_tablette")
+                        .addQueryParam("api_cle", "apitel-5304b49c90511")
+                        .addQueryParam("api_signature", signature("/v1/programmes/telechargementappareilandroid_tablettedates" + date.toString() + "id_chaines" + channel.getId() + "nb_par_page300page1"))
+                        .addHeader("accept-encoding", "gzip")
                         .execute().get();
 
                 date = date.plusDays(1);
@@ -337,12 +374,15 @@ public class TvForNoSql implements Serializable {
                     result.addAll(donnees.map(JSONObject::fromObject)
                             .map(json -> new ProgrammeForNoSql(json, genres)).collect(Collectors.toList()));
 
+                } else if (responseStatus != 404){
+
+                    throw new RuntimeException("Unable to get programmes data, status=" + response.getStatusCode() + ", response=" + response.getResponseBody());
                 }
 
 
             } while (responseStatus == 200);
 
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             throw new RuntimeException(e);
         }
 
