@@ -355,17 +355,11 @@ public class TvForNoSql implements Serializable {
 
                 String url = "http://api.telerama.fr/v1/programmes/telechargement?dates=" + date.toString() + "&id_chaines=" + channel.getId() + "&nb_par_page=300&page=1";
 
-                Response response = client
-                        .prepareGet(url)
-                        .addQueryParam("appareil", "android_tablette")
-                        .addQueryParam("api_cle", "apitel-5304b49c90511")
-                        .addQueryParam("api_signature", signature("/v1/programmes/telechargementappareilandroid_tablettedates" + date.toString() + "id_chaines" + channel.getId() + "nb_par_page300page1"))
-                        .addHeader("accept-encoding", "gzip")
-                        .execute().get();
+                Response response = getResponse(client, channel, date, url);
 
-                date = date.plusDays(1);
                 responseStatus = response.getStatusCode();
 
+                date = date.plusDays(1);
                 if (responseStatus == 200) {
                     Stream<Object> donnees = JSONObject.fromObject(response.getResponseBody())
                             .getJSONArray("donnees")
@@ -374,7 +368,7 @@ public class TvForNoSql implements Serializable {
                     result.addAll(donnees.map(JSONObject::fromObject)
                             .map(json -> new ProgrammeForNoSql(json, genres)).collect(Collectors.toList()));
 
-                } else if (responseStatus != 404){
+                } else if (responseStatus != 404 && responseStatus != 503) {
 
                     throw new RuntimeException("Unable to get programmes data, status=" + response.getStatusCode() + ", response=" + response.getResponseBody());
                 }
@@ -389,6 +383,29 @@ public class TvForNoSql implements Serializable {
         return result;
 
 
+    }
+
+    private static Response getResponse(AsyncHttpClient client, ChannelForNoSql channel, LocalDate date, String url) throws InterruptedException, ExecutionException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        int count = 0;
+        Response response;
+        do {
+            if (count > 0) {
+                Thread.sleep(count * 60000);
+                System.out.println("Retry of (" + count + ")" + url);
+            }
+            response = client
+                    .prepareGet(url)
+                    .addQueryParam("appareil", "android_tablette")
+                    .addQueryParam("api_cle", "apitel-5304b49c90511")
+                    .addQueryParam("api_signature", signature("/v1/programmes/telechargementappareilandroid_tablettedates" + date.toString() + "id_chaines" + channel.getId() + "nb_par_page300page1"))
+                    .addHeader("accept-encoding", "gzip")
+                    .execute().get();
+            
+            count++;
+
+        } while (response.getStatusCode() != 200 && response.getStatusCode() != 404 && response.getStatusCode() != 503 && count < 10);
+        
+        return response;
     }
 
 }
