@@ -353,7 +353,7 @@ public class TvForNoSql implements Serializable {
 
             do {
 
-                String url = "http://api.telerama.fr/v1/programmes/telechargement?dates=" + date.toString() + "&id_chaines=" + channel.getId() + "&nb_par_page=300&page=1";
+                String url = "https://api.telerama.fr/v1/programmes/telechargement?dates=" + date.toString() + "&id_chaines=" + channel.getId() + "&nb_par_page=300&page=1";
 
                 Response response = getResponse(client, channel, date, url);
 
@@ -402,6 +402,11 @@ public class TvForNoSql implements Serializable {
                     .execute().get();
             
             count++;
+
+            if (response.getStatusCode() != 200 && response.getStatusCode() != 404) {
+                String urlWithQueryParam = url + "&appareil=android_tablette&api_cle=apitel-5304b49c90511&api_signature=" + signature("/v1/programmes/telechargementappareilandroid_tablettedates" + date.toString() + "id_chaines" + channel.getId() + "nb_par_page300page1");
+                System.out.println("Error " + response.getStatusCode() + " for \ncurl \"" + urlWithQueryParam + "\"");
+            }
 
         } while (response.getStatusCode() != 200 && response.getStatusCode() != 404 && response.getStatusCode() != 503 && count < 10);
         
