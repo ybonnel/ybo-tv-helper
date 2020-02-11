@@ -368,7 +368,7 @@ public class TvForNoSql implements Serializable {
                     result.addAll(donnees.map(JSONObject::fromObject)
                             .map(json -> new ProgrammeForNoSql(json, genres)).collect(Collectors.toList()));
 
-                } else if (responseStatus != 404 && responseStatus != 503) {
+                } else if (responseStatus != 404 && responseStatus != 503 && responseStatus != 204) {
 
                     throw new RuntimeException("Unable to get programmes data, status=" + response.getStatusCode() + ", response=" + response.getResponseBody());
                 }

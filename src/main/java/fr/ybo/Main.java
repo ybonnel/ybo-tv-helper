@@ -14,7 +14,6 @@ import org.jongo.MongoCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
@@ -29,7 +28,7 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
 
-    public static void main(String[] args) throws IOException, JAXBException, InterruptedException, ExecutionException, URISyntaxException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public static void main(String[] args) throws IOException, InterruptedException, ExecutionException, URISyntaxException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
 
 
         logger.info("ybo-tv-helper begin");
