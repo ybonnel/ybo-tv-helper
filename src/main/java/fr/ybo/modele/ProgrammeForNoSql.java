@@ -100,7 +100,7 @@ public class ProgrammeForNoSql implements Serializable {
                     });
 
         }
-        this.critique = json.getString("critique");
+        this.critique = null;
         this.categories = new ArrayList<>();
 
 
